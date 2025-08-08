@@ -4,6 +4,7 @@ import sys
 import os
 from os import path
 import traceback
+import time
 
 # local application imports
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
@@ -58,7 +59,7 @@ class MainGSM(GSM):
         iteration = 0
         while not isGrown:
             if iteration > max_iters:
-                print(" Ran out of iterations")
+                print(f" Ran out of iterations: {iteration} / {max_iters}")
                 return
                 # raise Exception(" Ran out of iterations")
             printcool("Starting growth iteration %i" % iteration)
@@ -145,6 +146,8 @@ class MainGSM(GSM):
 
         self.isConverged = False
         oi = 0
+        
+        start_time = time.time()
 
         # enter loop
         while oi < max_iter:
@@ -246,6 +249,7 @@ class MainGSM(GSM):
                         print(f"Error at oi={oi}")
                         traceback.print_exc()
                         raise e
+                    
                 elif self.find and (self.optimizer[self.TSnode].nneg > 3 or self.optimizer[self.TSnode].nneg == 0 or self.hess_counter > 10 or np.abs(self.TS_E_0 - self.emax) > 10.) and not self.optimizer[self.TSnode].converged:
 
                     # Reform the guess primitive Hessian
@@ -282,6 +286,10 @@ class MainGSM(GSM):
             
             if self.isConverged and not added and not ts_node_changed and not stage_changed:
                 print("Converged")
+                print(f"{self.__class__.__name__} optimize_string result: Converged")
+                end_time = time.time()
+                print(f"Time taken: {end_time - start_time:.2f} seconds")
+                print(f"Iterations: {oi}")
                 return
 
             # => Reparam the String <= #
@@ -294,12 +302,18 @@ class MainGSM(GSM):
                     self.slow_down_climb()
             elif oi == max_iter and not self.isConverged:
                 self.ran_out = True
-                print(" Ran out of iterations")
+                print(f" Ran out of iterations: {oi} / {max_iter}")
+                print(f"{self.__class__.__name__} optimize_string result: Ran out of iterations")
+                print(f"Time taken: {time.time() - start_time:.2f} seconds")
                 return
                 # raise Exception(" Ran out of iterations")
 
         # TODO Optimize TS node to a finer convergence
         # if rtype==2:
+        
+        print(f"{self.__class__.__name__} optimize_string result: Ran out of iterations uncaught")
+        print(f"Time taken: {time.time() - start_time:.2f} seconds")
+        
         return
 
     def refresh_coordinates(self, update_TS=False):
