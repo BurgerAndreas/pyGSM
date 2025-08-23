@@ -313,7 +313,12 @@ class PrimitiveInternalCoordinates(InternalCoordinates):
         """
         global CacheWarning
         t0 = time.time()
-        xhash = hash(xyz.tostring())
+        # the tostring() method was deprecated in numpy versions 1.24 and up
+        # and replaced by tobytes()
+        try:
+            xhash = hash(xyz.tostring())
+        except Exception as e:
+            xhash = hash(xyz.tobytes())
         ht = time.time() - t0
         if xhash in self.stored_wilsonB:
             # print(" returning stored")
