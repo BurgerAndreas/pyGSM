@@ -82,6 +82,7 @@ class DE_GSM(MainGSM):
         filename = "opt_converged_{:03d}.xyz".format(self.ID)
         print(" Printing string to " + filename)
         self.xyz_writer(filename, self.geometries, self.energies, self.gradrmss, self.dEs)
+        # Caution: very necessary. Later this is used as criteria in ReactBench/gsm.py calculation_terminated_successfully
         print("Finished GSM!")
 
         return
@@ -219,6 +220,7 @@ if __name__ == '__main__':
     from potential_energy_surfaces.pes import PES
     from coordinate_systems.delocalized_coordinates import DelocalizedInternalCoordinates, PrimitiveInternalCoordinates, Topology
     from optimizers import eigenvector_follow
+    from utilities.elements import ElementData
 
     geoms = manage_xyz.read_molden_geoms('../growing_string_methods/opt_converged_000.xyz')
     lot = Dummy.from_options(geom=geoms[0])
@@ -226,7 +228,7 @@ if __name__ == '__main__':
     pes = PES.from_options(lot=lot, ad_idx=0, multiplicity=1)
     atom_symbols = manage_xyz.get_atoms(geoms[0])
 
-    ELEMENT_TABLE = elements.ElementData()
+    ELEMENT_TABLE = ElementData()
     atoms = [ELEMENT_TABLE.from_symbol(atom) for atom in atom_symbols]
     xyz1 = manage_xyz.xyz_to_np(geoms[0])
     xyz2 = manage_xyz.xyz_to_np(geoms[-1])
